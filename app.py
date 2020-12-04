@@ -29,7 +29,7 @@ def new_game():
     return jsonify({"gameId": game_id, "board": game.board})
 
 
-@app.route('/api/score-word')
+@app.route('/api/score-word', methods=["POST"])
 def score_word():
     word = request.json['word']
     game_id = request.json['gameId']
