@@ -29,15 +29,15 @@ def new_game():
     return jsonify({"gameId": game_id, "board": game.board})
 
 
-@app.route("/api/score-word")
+@app.route('/api/score-word')
 def score_word():
     word = request.json['word']
     game_id = request.json['gameId']
     game = games[game_id]
 
     if not game.is_word_in_word_list(word):
-        return jsonify({result: 'not-word'})
+        return jsonify({'result': 'not-word'})
     if not game.check_word_on_board(word):
-        return jsonify({result: 'not-on-board'})
+        return jsonify({'result': 'not-on-board'})
     else:
-        return jsonify({result: 'ok'})
+        return jsonify({'result': 'ok'})
