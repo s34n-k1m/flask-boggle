@@ -31,6 +31,7 @@ def new_game():
 
 @app.route('/api/score-word', methods=["POST"])
 def score_word():
+    """ Checks if submitted word is valid and returns result in JSON """
     word = request.json['word']
     game_id = request.json['gameId']
     game = games[game_id]

@@ -26,10 +26,9 @@ class BoggleAppTestCase(TestCase):
         with self.client as client:
             resp = client.get('/')
             html = resp.get_data(as_text=True)
-      
+
             self.assertEqual(resp.status_code, 200)
             self.assertIn('id="newWordForm"', html)
-
 
     def test_api_new_game(self):
         """Test starting a new game."""
@@ -44,32 +43,35 @@ class BoggleAppTestCase(TestCase):
             self.assertIsInstance(data['board'][0], list)
             self.assertIn(data['gameId'], games)
 
-
     def test_api_score_word(self):
         """ Test scoring a valid word """
 
-        test_game = BoggleGame()
-        test_board = [['V', 'F', 'A', 'O', 'Z'], ['O', 'B', 'L', 'E', 'I'], ['D', 'B', 'R', 'E', 'E'], ['A', 'L', 'I', 'Z', 'U'], ['R', 'L', 'E', 'R', 'I']]
-        test_game.board = test_board
-        test_id = "test_id"
-        games[test_id] = test_game
-
         with self.client as client:
-            resp = client.post("/api/score-word", json={'word': 'ALE', 'gameId': test_id })
-            good_data = resp.get_json()
+            resp = client.get("/api/new-game")
+            game_id = resp.get_json()['gameId']
+            game = games[game_id]
+
+            game.board = [
+                ['V', 'F', 'A', 'O', 'Z'],
+                ['O', 'B', 'L', 'E', 'I'],
+                ['D', 'B', 'R', 'E', 'E'],
+                ['A', 'L', 'I', 'Z', 'U'],
+                ['R', 'L', 'E', 'R', 'I']]
+
+            resp = client.post("/api/score-word",
+                               json={'word': 'ALE', 'gameId': game_id})
 
             self.assertEqual(resp.status_code, 200)
-            self.assertEqual(good_data, {'result': 'ok'})
-            
-            resp = client.post("/api/score-word", json={'word': '#$@$*afafa', 'gameId': test_id })
-            bad_data = resp.get_json()
+            self.assertEqual(resp.get_json(), {'result': 'ok'})
+
+            resp = client.post("/api/score-word",
+                               json={'word': '#$@$*afafa', 'gameId': game_id})
 
             self.assertEqual(resp.status_code, 200)
-            self.assertEqual(bad_data, {'result': 'not-word'})
-        
-            resp = client.post("/api/score-word", json={'word': 'CAT', 'gameId': test_id })
-            bad_data2 = resp.get_json()
+            self.assertEqual(resp.get_json(), {'result': 'not-word'})
+
+            resp = client.post("/api/score-word",
+                               json={'word': 'CAT', 'gameId': game_id})
 
             self.assertEqual(resp.status_code, 200)
-            self.assertEqual(bad_data2, {'result': 'not-on-board'})
-    
+            self.assertEqual(resp.get_json(), {'result': 'not-on-board'})
