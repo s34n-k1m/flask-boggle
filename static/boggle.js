@@ -7,9 +7,14 @@ const $message = $(".msg");
 const $table = $("table");
 const $wordScore = $(".wordScore");
 const $gameScore = $(".gameScore");
+const $clock = $(".time");
 
 let gameId;
+let timeRemaining;
+let timerId;
+
 const SCORE_WORD_ROUTE = '/api/score-word';
+const GAME_LENGTH = 5000;
 
 /** Start */
 
@@ -19,6 +24,9 @@ async function start() {
   let board = response.data.board;
 
   displayBoard(board);
+  timeRemaining = GAME_LENGTH;
+  $clock.text(`Time Remaining: ${timeRemaining/1000} seconds`);
+  timerId = setInterval(countDown, 1000);
 }
 
 /** Display board */
@@ -96,6 +104,19 @@ function showRunningScores(wordScore, gameScore) {
   $wordScore.text(`Word Score: ${wordScore}`);
   $gameScore.text(`Game Score: ${gameScore}`);
 }
+
+function countDown() {
+  timeRemaining -= 1000;
+  $clock.text(`Time Remaining: ${timeRemaining/1000} seconds`);
+
+  if (timeRemaining === 0) {
+    clearInterval(timerId);
+    $clock.text("GAME OVER!");
+    
+    $
+  }
+}
+
 
 $form.on("submit", submitForm)
 
