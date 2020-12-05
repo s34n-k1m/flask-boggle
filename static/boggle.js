@@ -14,7 +14,7 @@ let timeRemaining;
 let timerId;
 
 const SCORE_WORD_ROUTE = '/api/score-word';
-const GAME_LENGTH = 5000;
+const GAME_LENGTH = 30000;
 
 /** Start */
 
@@ -60,6 +60,8 @@ function displayBoard(board) {
 */
 async function submitForm(evt) {
   evt.preventDefault();
+
+  if (!timeRemaining) return;
 
   const word = $wordInput.val().toUpperCase();
 
@@ -112,8 +114,6 @@ function countDown() {
   if (timeRemaining === 0) {
     clearInterval(timerId);
     $clock.text("GAME OVER!");
-    
-    $
   }
 }
 
