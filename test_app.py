@@ -50,6 +50,7 @@ class BoggleAppTestCase(TestCase):
             resp = client.get("/api/new-game")
             game_id = resp.get_json()['gameId']
             game = games[game_id]
+            game.score = 0
 
             game.board = [
                 ['V', 'F', 'A', 'O', 'Z'],
@@ -58,20 +59,48 @@ class BoggleAppTestCase(TestCase):
                 ['A', 'L', 'I', 'Z', 'U'],
                 ['R', 'L', 'E', 'R', 'I']]
 
+            # Successful word
             resp = client.post("/api/score-word",
                                json={'word': 'ALE', 'gameId': game_id})
 
             self.assertEqual(resp.status_code, 200)
-            self.assertEqual(resp.get_json(), {'result': 'ok'})
+            self.assertEqual(resp.get_json(), {
+                'result': 'ok', 
+                'wordScore': 1, 
+                'gameScore': 1
+                })
 
-            resp = client.post("/api/score-word",
-                               json={'word': '#$@$*afafa', 'gameId': game_id})
+            # Invalid words
+            resp = client.post("/api/score-word", json={
+                'word': '#$@$*afafa', 
+                'gameId': game_id,
+                })
 
             self.assertEqual(resp.status_code, 200)
-            self.assertEqual(resp.get_json(), {'result': 'not-word'})
+            self.assertEqual(resp.get_json(), {
+                'result': 'not-word', 
+                'wordScore': 0, 
+                'gameScore': 1
+                })
 
-            resp = client.post("/api/score-word",
-                               json={'word': 'CAT', 'gameId': game_id})
+            resp = client.post("/api/score-word", json={
+                'word': 'CAT', 
+                'gameId': game_id,
+                })
 
             self.assertEqual(resp.status_code, 200)
-            self.assertEqual(resp.get_json(), {'result': 'not-on-board'})
+            self.assertEqual(resp.get_json(), {
+                'result': 'not-on-board', 
+                'wordScore': 0, 
+                'gameScore': 1
+                })
+
+            # Duplicate word also invalid
+            resp = client.post("/api/score-word", json={'word': 'ALE', 'gameId': game_id})
+
+            self.assertEqual(resp.status_code, 200)
+            self.assertEqual(resp.get_json(), {
+                'result': 'word-already-used', 
+                'wordScore': 0, 
+                'gameScore': 1
+                })

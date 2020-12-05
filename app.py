@@ -36,9 +36,14 @@ def score_word():
     game_id = request.json['gameId']
     game = games[game_id]
 
+    # TODO: Check if the word submitted is a dup
+
     if not game.is_word_in_word_list(word):
-        return jsonify({'result': 'not-word'})
-    if not game.check_word_on_board(word):
-        return jsonify({'result': 'not-on-board'})
+        return jsonify({'result': 'not-word', "wordScore": 0, "gameScore": game.score})
+    elif not game.check_word_on_board(word):
+        return jsonify({'result': 'not-on-board', "wordScore": 0, "gameScore": game.score})
+    elif not game.is_word_not_a_dup(word):
+        return jsonify({'result': 'word-already-used', "wordScore": 0, "gameScore": game.score}) 
     else:
-        return jsonify({'result': 'ok'})
+        word_score = game.play_and_score_word(word)
+        return jsonify({'result': 'ok', "wordScore": word_score, "gameScore": game.score})

@@ -5,6 +5,8 @@ const $form = $("#newWordForm");
 const $wordInput = $("#wordInput");
 const $message = $(".msg");
 const $table = $("table");
+const $wordScore = $(".wordScore");
+const $gameScore = $(".gameScore");
 
 let gameId;
 const SCORE_WORD_ROUTE = '/api/score-word';
@@ -59,9 +61,9 @@ async function submitForm(evt) {
     data: { gameId, word }
   })
 
-  const { result } = resp.data;
-  handleWordDisplay(result, word)
-
+  handleWordDisplay(resp.data, word);
+  // clear form
+  $wordInput.val("");
 }
 
 /**
@@ -69,16 +71,30 @@ async function submitForm(evt) {
  * If word not legal, displays message on screen 
  * If word is valid, adds it to word list in DOM
 */
-function handleWordDisplay(result, word) {
+function handleWordDisplay(data, word) {
   $message.empty();
+  const { result, wordScore, gameScore } = data;
+  $wordScore.text("Word Score: ");
 
   if (result === "ok") {
     $playedWords.append(`<li>${word}</li>`);
+    showRunningScores(wordScore, gameScore);
   } else if (result === 'not-word') {
     $message.text(`${word} is not a valid word!`);
-  } else {
+  } else if (result === 'not-on-board') {
     $message.text(`${word} is not on the board!`);
+  } else {
+    // duplicate
+    $message.text(`${word} has already been submitted`);
   }
+}
+
+/** 
+ * Takes the API response scores and shows them in the DOM
+ * */  
+function showRunningScores(wordScore, gameScore) {
+  $wordScore.text(`Word Score: ${wordScore}`);
+  $gameScore.text(`Game Score: ${gameScore}`);
 }
 
 $form.on("submit", submitForm)
